@@ -1,0 +1,56 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+
+export async function getStaticPaths() {
+  const projects = await getCollection('projects');
+  return projects.map((p) => ({ params: { slug: p.id }, props: { project: p } }));
+}
+
+const { project } = Astro.props;
+const { Content } = await render(project);
+const d = project.data;
+const base = import.meta.env.BASE_URL;
+---
+<Base title={`${d.title} — Oleksandr Kolomoiets`} description={d.summary} mermaid>
+  <article>
+    <a class="back" href={`${base}#projects`}>All projects</a>
+    <h1>{d.title}</h1>
+    <p class="lead">{d.summary}</p>
+
+    <dl class="facts">
+      <div><dt>Status</dt><dd>{d.status}</dd></div>
+      <div><dt>Stack</dt><dd>{d.stack.join(', ')}</dd></div>
+      {d.links.length > 0 && (
+        <div>
+          <dt>Links</dt>
+          <dd class="links">{d.links.map((l) => <a href={l.href}>{l.label}</a>)}</dd>
+        </div>
+      )}
+    </dl>
+
+    <div class="prose">
+      <Content />
+    </div>
+  </article>
+</Base>
+
+<style>
+  article { padding-top: 1.5rem; }
+  .back { display: inline-block; margin-bottom: 2rem; color: var(--muted); font-size: 0.95rem; }
+  h1 { font-size: clamp(2.2rem, 7vw, 4rem); line-height: 1.05; margin-bottom: 1.25rem; }
+  .lead { max-width: 60ch; font-size: 1.2rem; line-height: 1.5; margin: 0 0 2.5rem; }
+
+  .facts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+    gap: 1.25rem 2rem;
+    margin: 0 0 1rem;
+    padding: 1.25rem 0;
+    border-top: 2px solid var(--ink);
+    border-bottom: 1px solid var(--rule);
+  }
+  dt { color: var(--muted); font-size: 0.85rem; margin-bottom: 0.2rem; }
+  dd { margin: 0; }
+  .links { display: flex; flex-wrap: wrap; gap: 0.25rem 1rem; }
+</style>

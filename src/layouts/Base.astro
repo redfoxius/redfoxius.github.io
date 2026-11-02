@@ -1,0 +1,62 @@
+---
+import Band from '../components/Band.astro';
+import '../styles/global.css';
+
+interface Props { title: string; description: string; mermaid?: boolean }
+const { title, description, mermaid = false } = Astro.props;
+const base = import.meta.env.BASE_URL;
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <link rel="icon" href={`${base}favicon.svg`} type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600&family=Unbounded:wght@500;600&display=swap" rel="stylesheet" />
+  </head>
+  <body>
+    <Band />
+    <header class="site-header">
+      <a class="home" href={base}>Oleksandr Kolomoiets</a>
+      <nav aria-label="Site">
+        <a href={`${base}#projects`}>Projects</a>
+        <a href={`${base}#contact`}>Contact</a>
+      </nav>
+    </header>
+    <main>
+      <slot />
+    </main>
+    <footer id="contact" class="site-footer">
+      <p class="footer-title">Get in touch</p>
+      <ul>
+        <li><a href="mailto:redfoxius@gmail.com">redfoxius@gmail.com</a></li>
+        <li><a href="https://www.linkedin.com/in/oleksandr-kolomoiets">LinkedIn</a></li>
+        <li><a href="https://t.me/redfoxius">Telegram @redfoxius</a></li>
+        <li><a href="https://github.com/redfoxius">GitHub</a></li>
+      </ul>
+    </footer>
+    {mermaid && (
+      <script type="module" is:inline>
+        const blocks = document.querySelectorAll('pre > code.language-mermaid');
+        if (blocks.length) {
+          const { default: mermaid } = await import('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs');
+          const dark = matchMedia('(prefers-color-scheme: dark)').matches;
+          blocks.forEach((code) => {
+            const div = document.createElement('div');
+            div.className = 'mermaid';
+            div.textContent = code.textContent;
+            code.parentElement.replaceWith(div);
+          });
+          mermaid.initialize({ startOnLoad: false, theme: dark ? 'dark' : 'neutral', fontFamily: 'Golos Text, sans-serif' });
+          await mermaid.run();
+        }
+      </script>
+    )}
+  </body>
+</html>

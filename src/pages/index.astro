@@ -1,0 +1,91 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+
+const all = (await getCollection('projects')).sort((a, b) => a.data.order - b.data.order);
+const groups = [
+  { key: 'product', title: 'Products', note: 'Source code is private. I can walk you through the architecture and code on a call.' },
+  { key: 'open-source', title: 'Open source', note: 'Code is public on GitHub.' },
+] as const;
+const base = import.meta.env.BASE_URL;
+---
+<Base
+  title="Oleksandr Kolomoiets — backend developer"
+  description="Backend developer focused on data infrastructure: Go, PostgreSQL, Elasticsearch, Kafka. Case studies of products I built end to end."
+>
+  <section class="intro">
+    <h1>I build products from the data model up.</h1>
+    <p>
+      Backend developer from Ukraine, working on data infrastructure: Go, PostgreSQL,
+      Elasticsearch, Kafka. Outside my day job I build products end to end, from the schema
+      to the server they run on. Here are five of them, with the decisions that shaped each one.
+    </p>
+  </section>
+
+  <div id="projects">
+    {groups.map((g) => (
+      <section class="group" aria-labelledby={`g-${g.key}`}>
+        <div class="group-head">
+          <h2 id={`g-${g.key}`}>{g.title}</h2>
+          <p>{g.note}</p>
+        </div>
+        <ul class="projects">
+          {all.filter((p) => p.data.group === g.key).map((p) => (
+            <li class="project">
+              <div class="project-name">
+                <h3><a href={`${base}projects/${p.id}/`}>{p.data.title}</a></h3>
+                <p class="status">{p.data.status}</p>
+              </div>
+              <div class="project-body">
+                <p>{p.data.summary}</p>
+                <p class="stack">{p.data.stack.join(', ')}</p>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </section>
+    ))}
+  </div>
+</Base>
+
+<style>
+  .intro { padding: 3rem 0 4rem; max-width: 46rem; }
+  .intro h1 {
+    font-size: clamp(2rem, 5.5vw, 3.6rem);
+    line-height: 1.08;
+    margin-bottom: 1.5rem;
+  }
+  .intro p { max-width: 60ch; color: var(--muted); font-size: 1.125rem; margin: 0; }
+
+  .group { margin-top: 3rem; }
+  .group-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.25rem 1.25rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid var(--ink);
+  }
+  .group-head h2 { font-size: 1.25rem; }
+  .group-head p { margin: 0; color: var(--muted); font-size: 0.95rem; }
+
+  .projects { list-style: none; margin: 0; padding: 0; }
+  .project {
+    display: grid;
+    grid-template-columns: minmax(0, 15rem) minmax(0, 1fr);
+    gap: 0.5rem 2.5rem;
+    padding: 1.75rem 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  .project h3 { font-size: 1.35rem; }
+  .project h3 a { color: var(--ink); text-decoration: none; }
+  .project h3 a:hover { color: var(--madder); text-decoration: underline; }
+  .status { margin: 0.4rem 0 0; color: var(--madder); font-size: 0.9rem; }
+  .project-body p { margin: 0; max-width: 62ch; }
+  .project-body .stack { margin-top: 0.6rem; color: var(--muted); font-size: 0.9rem; }
+
+  @media (max-width: 40rem) {
+    .intro { padding: 1.5rem 0 2.5rem; }
+    .project { grid-template-columns: 1fr; }
+  }
+</style>
